@@ -1,0 +1,203 @@
+:root {
+  --bg: #0f0f1a;
+  --surface-1: #171727;
+  --surface-2: #1a1a2e;
+  --text-primary: #f5f5f7;
+  --text-secondary: #b3b3c6;
+  --accent: #4f8cff;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.app-root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.tagline {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.greeting-banner {
+  background: var(--surface-1);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .app-main {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chat-window,
+.crowd-map,
+.accessibility-panel {
+  background: var(--surface-1);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.chat-messages {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 85%;
+  line-height: 1.4;
+}
+
+.chat-bubble--user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+}
+
+.chat-bubble--bot {
+  align-self: flex-start;
+  background: var(--surface-2);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.chat-input-row button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.chat-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+}
+
+.zone-legend {
+  list-style: none;
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.crowd-map-warning {
+  color: #f9a825;
+  font-size: 0.8rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.language-selector select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid #333;
+}
+
+/* Accessibility modes */
+.app-root.high-contrast {
+  --bg: #000;
+  --surface-1: #000;
+  --surface-2: #111;
+  --text-primary: #fff;
+  --text-secondary: #fff;
+  --accent: #ffdd00;
+}
+
+.app-root.high-contrast .chat-bubble--user {
+  color: #000;
+}
+
+.app-root.large-text {
+  font-size: 1.25rem;
+}
+
+.app-root.large-text h1 {
+  font-size: 2.2rem;
+}

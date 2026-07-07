@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    ports:
+      - '5000:5000'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/fansaathi
+      - CORS_ORIGIN=http://localhost:5173
+      - CV_SERVICE_URL=http://cv-service:6000
+    depends_on:
+      - mongo
+
+  cv-service:
+    build: ./cv-service
+    ports:
+      - '6000:6000'
+    environment:
+      - BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
