@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const scenarios = [
   {
@@ -23,6 +23,10 @@ const scenarios = [
   }
 ];
 
+/**
+ * Main application component for FIFA World Cup 2026 Stadium Operations
+ * Provides AI-powered assistance for venue management, accessibility, transit, and sustainability
+ */
 function App() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -33,15 +37,18 @@ function App() {
   const [imagePreview, setImagePreview] = useState('');
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
-  // Persist theme to localStorage and set data attribute for CSS
-  useState(() => {
+  /**
+   * Effect: Persist theme to localStorage and set data attribute for CSS styling
+   */
+  useEffect(() => {
     try {
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
     } catch (e) {
-      // ignore (e.g., SSR or restricted environment)
+      // Ignore errors (e.g., SSR or restricted environment)
+      console.warn('Theme persistence failed:', e);
     }
-  });
+  }, [theme]);
 
   const insightCards = useMemo(() => [
     { label: 'Live crowd pressure', value: 'High near Gate B', tone: 'alert' },
@@ -50,32 +57,68 @@ function App() {
     { label: 'Eco initiatives', value: '20 shuttles on electric mode', tone: 'good' }
   ], []);
 
+  /**
+   * Utility to validate URLs
+   * @param {string} url - URL to validate
+   * @returns {boolean} - True if valid http/https URL
+   */
+  const isValidUrl = (url) => {
+    if (!url) return false;
+    try {
+      const u = new URL(url);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  /**
+   * Fetches AI-generated guidance from the assistant API
+   * @param {string} prompt - User query or scenario prompt
+   * @param {string} image - Optional image URL
+   */
   const askAssistant = async (prompt, image) => {
+    if (!prompt || prompt.trim().length === 0) {
+      setError('Please provide a prompt or select a scenario.');
+      return;
+    }
+
     setLoading(true);
     setError('');
+    setAnswer('');
 
     try {
       const payload = { prompt };
       const url = (image || '').trim();
-      if (url && /^(https?:)\/\//i.test(url)) {
+      if (url && isValidUrl(url)) {
         payload.imageUrl = url;
       }
 
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(30000) // 30-second timeout
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || data.error || 'Unable to generate guidance.');
+        const data = await response.json();
+        throw new Error(data.detail || data.error || `HTTP ${response.status}: Unable to generate guidance.`);
+      }
+
+      const data = await response.json();
+      if (!data.reply) {
+        throw new Error('Empty response from assistant.');
       }
 
       setAnswer(data.reply);
     } catch (err) {
-      setError(err.message || 'Unable to generate guidance.');
+      const errorMessage = err.name === 'AbortError' 
+        ? 'Request timeout. Please try again.' 
+        : (err.message || 'Unable to generate guidance.');
+      setError(errorMessage);
       setAnswer('');
+      console.error('Assistant error:', err);
     } finally {
       setLoading(false);
     }
@@ -126,43 +169,41 @@ function App() {
             placeholder="Ask for navigation advice, accessibility help, transport reroutes, or sustainability actions..."
           />
 
-          <label htmlFor="image-url" style={{ display: 'block', marginTop: 8 }}>Optional image URL (e.g., screenshot of a crowd area)</label>
+          <label htmlFor="image-url" style={{ display: 'block', marginTop: 8 }}>
+            Optional image URL (e.g., screenshot of a crowd area)
+          </label>
           <input
             id="image-url"
             value={imageUrl}
             onChange={(e) => {
               const v = e.target.value;
               setImageUrl(v);
-              // client-side validation
-              try {
-                const u = new URL(v);
-                if (u.protocol === 'http:' || u.protocol === 'https:') {
-                  setImageValid(true);
-                  setImagePreview(v);
-                } else {
-                  setImageValid(false);
-                  setImagePreview('');
-                }
-              } catch (err) {
-                if (v.trim() === '') {
-                  setImageValid(true);
-                  setImagePreview('');
-                } else {
-                  setImageValid(false);
-                  setImagePreview('');
-                }
-              }
+              // Client-side validation
+              const valid = isValidUrl(v) || v.trim() === '';
+              setImageValid(valid);
+              setImagePreview(valid && v.trim() !== '' ? v : '');
             }}
             placeholder="https://example.com/crowd.jpg"
             style={{ width: '100%', padding: 8, borderRadius: 8, marginTop: 6, border: '1px solid rgba(255,255,255,0.08)' }}
             aria-label="Optional image URL"
           />
 
-          {!imageValid && <div className="error-text" role="alert">Image URL must be a valid http:// or https:// address.</div>}
+          {!imageValid && (
+            <div className="error-text" role="alert">
+              Image URL must be a valid http:// or https:// address.
+            </div>
+          )}
 
           {imagePreview && (
             <div className="image-preview">
-              <img src={imagePreview} alt="Preview" onError={(e) => { setImageValid(false); e.currentTarget.style.display = 'none'; }} />
+              <img 
+                src={imagePreview} 
+                alt="Image preview" 
+                onError={() => {
+                  setImageValid(false);
+                  setImagePreview('');
+                }} 
+              />
             </div>
           )}
 
