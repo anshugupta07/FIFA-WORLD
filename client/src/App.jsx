@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { getApiUrl } from './config';
 
 const scenarios = [
   {
@@ -94,7 +95,7 @@ function App() {
         payload.imageUrl = url;
       }
 
-      const response = await fetch('/api/assistant', {
+      const response = await fetch(getApiUrl('/api/assistant'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

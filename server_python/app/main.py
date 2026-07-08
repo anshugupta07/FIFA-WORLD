@@ -29,9 +29,21 @@ app = FastAPI(
 
 # CORS configuration for development
 # In production, restrict origins to your deployment domain
+# Examples:
+#   - Vercel: https://your-app.vercel.app
+#   - Custom domain: https://yourdomain.com
+#   - Multiple origins: ["https://vercel.app", "https://yourdomain.com"]
+
+# Get allowed origins from environment or use defaults
+import os
+ALLOWED_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
