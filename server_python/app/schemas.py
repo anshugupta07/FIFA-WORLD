@@ -4,7 +4,7 @@ Pydantic models for stadium operations assistant API
 Defines request/response schemas with validation for the /v1/assistant endpoint.
 """
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 from typing import Optional
 
 
@@ -28,6 +28,15 @@ class AssistantRequest(BaseModel):
         max_length=1024
     )
     
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "prompt": "Help a wheelchair user reach the accessible entrance",
+                "imageUrl": "https://example.com/stadium-crowd.jpg"
+            }
+        }
+    )
+
     @field_validator('imageUrl', mode='before')
     @classmethod
     def validate_image_url(cls, v):
@@ -40,15 +49,6 @@ class AssistantRequest(BaseModel):
         except Exception:
             return None
 
-    class Config:
-        """Pydantic model configuration"""
-        json_schema_extra = {
-            "example": {
-                "prompt": "Help a wheelchair user reach the accessible entrance",
-                "imageUrl": "https://example.com/stadium-crowd.jpg"
-            }
-        }
-
 
 class AssistantResponse(BaseModel):
     """
@@ -58,6 +58,15 @@ class AssistantResponse(BaseModel):
         reply: Generated guidance text
         source: Origin of the response ('rules' for deterministic, 'gemini' for LLM-phrased)
     """
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "reply": "Accessible route recommended: use the east elevators...",
+                "source": "rules"
+            }
+        }
+    )
+
     reply: str = Field(
         ...,
         description="AI-generated guidance response"
@@ -66,12 +75,3 @@ class AssistantResponse(BaseModel):
         None,
         description="Source of the response: 'rules' (deterministic) or 'gemini' (LLM-phrased)"
     )
-
-    class Config:
-        """Pydantic model configuration"""
-        json_schema_extra = {
-            "example": {
-                "reply": "Accessible route recommended: use the east elevators...",
-                "source": "rules"
-            }
-        }

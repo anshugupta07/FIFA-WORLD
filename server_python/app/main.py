@@ -56,6 +56,12 @@ app.add_middleware(
     summary="Get AI stadium operations guidance",
     tags=["Assistant"]
 )
+@app.post(
+    "/api/assistant",
+    response_model=AssistantResponse,
+    summary="Compatibility alias for frontend deployment",
+    tags=["Assistant"]
+)
 async def assistant(req: AssistantRequest) -> AssistantResponse:
     """
     Process user query and return AI-generated stadium operations guidance

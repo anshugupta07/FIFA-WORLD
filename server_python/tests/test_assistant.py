@@ -209,6 +209,15 @@ def test_api_response_structure():
     assert data['source'] in ['rules', 'gemini', None]
 
 
+def test_api_supports_api_alias_route_for_deployment():
+    """Deployment compatibility: frontend /api/assistant should resolve on the Python backend too."""
+    response = client.post('/api/assistant', json={'prompt': 'Suggest a transit route'})
+    assert response.status_code == 200
+    data = response.json()
+    assert 'reply' in data
+    assert 'source' in data
+
+
 # ============================================================================
 # Integration Tests
 # ============================================================================
